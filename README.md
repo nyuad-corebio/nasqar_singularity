@@ -35,7 +35,7 @@ To convert this sandbox as a sif file.
 sudo singularity build nasqar.sif nasqar_sandbox
 ```
 
-To run, you need to create two directories named logs and lib in the current working directory. 
+To run, you need to create two directories.  
 ```
 mkdir logs lib
 ```
