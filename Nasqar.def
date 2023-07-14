@@ -1,19 +1,24 @@
+##Singularity definition file for Nasqar
+
 Bootstrap: docker
 From: rocker/shiny:4.2.3
 
+#Copying files from current directory. 
+
 %files
-    /home/jr5241/singularity/environment.yaml /home/shiny/environment.yaml
-    /home/jr5241/singularity/NASQAR /opt/nasqar_build/NASQAR
-    /home/jr5241/singularity/ClusterProfShinyGSEA /opt/nasqar_build/ClusterProfShinyGSEA
-    /home/jr5241/singularity/ClusterProfShinyORA /opt/nasqar_build/ClusterProfShinyORA
-    /home/jr5241/singularity/shiny-server.conf /etc/shiny-server/shiny-server.conf
-    /home/jr5241/singularity/shiny-server.sh /opt/nasqar_build/shiny-server.sh
-    /home/jr5241/singularity/DEApp /opt/nasqar_build/DEApp
-    /home/jr5241/singularity/deseq2shiny /opt/nasqar_build/deseq2shiny
-    /home/jr5241/singularity/GeneCountMerger /opt/nasqar_build/GeneCountMerger
-    /home/jr5241/singularity/ATACseqQCShniy /opt/nasqar_build/ATACseqQCShniy
+    environment.yaml /home/shiny/environment.yaml
+    NASQAR /opt/nasqar_build/NASQAR
+    ClusterProfShinyGSEA /opt/nasqar_build/ClusterProfShinyGSEA
+    ClusterProfShinyORA /opt/nasqar_build/ClusterProfShinyORA
+    shiny-server.conf /etc/shiny-server/shiny-server.conf
+    shiny-server.sh /opt/nasqar_build/shiny-server.sh
+    DEApp /opt/nasqar_build/DEApp
+    deseq2shiny /opt/nasqar_build/deseq2shiny
+    GeneCountMerger /opt/nasqar_build/GeneCountMerger
+    ATACseqQCShniy /opt/nasqar_build/ATACseqQCShniy
     
 %post
+#Install system packages 
     apt-get update \
     && apt-get install -y vim libjpeg9 libtiff5-dev cmake libmagick++-dev libarchive-dev \
     && apt-get autoremove -yqq --purge \
@@ -21,21 +26,26 @@ From: rocker/shiny:4.2.3
     && rm -rf /var/lib/apt/lists/*
     
     cd /opt/nasqar_build && wget https://github.com/UMMS-Biocore/debrowser/archive/refs/heads/master.zip && unzip master.zip
-    
+
+#Defining local timzezone.    
     export TZ=Asia/Dubai
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+#Creating local directory 
     mkdir /var/log/nasqar
     chmod 777 /var/log/nasqar
 
+#Applying permission to shiny home directory
     chown -R shiny:shiny /home/shiny
     cd /home/shiny
 
+#Downloading conda and defining the path.
     su shiny -c "wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
     mkdir /home/shiny/.conda
     su shiny -c "bash Miniconda3-latest-Linux-x86_64.sh -b -p /home/shiny/miniconda3"
     rm -f Miniconda3-latest-Linux-x86_64.sh
 
+#Installing mamba package and created environment using mamba.
     echo 'PATH="/home/shiny/miniconda3/bin:$PATH"' >> /home/shiny/.bashrc
     su shiny -c "/home/shiny/miniconda3/bin/conda install -c conda-forge mamba -y"
     su shiny -c "cd /home/shiny && /home/shiny/miniconda3/bin/mamba env create -f environment.yaml"
@@ -45,6 +55,7 @@ From: rocker/shiny:4.2.3
     echo 'alias l="ls -lah"' >> /home/shiny/.bashrc
     su shiny -c "cd /home/shiny && /home/shiny/miniconda3/bin/conda clean --all -y"
 
+#Installing set of R and Rshiny package as follows 
     su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"install.packages(c('stringi', 'GOplot', 'wordcloud2'), repos='http://cran.rstudio.com/')\""
     su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"devtools::install_github('YuLab-SMU/clusterProfiler')\""
     su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install(c('org.Hs.eg.db','org.Mm.eg.db','org.Rn.eg.db','org.Sc.sgd.db','org.Dm.eg.db','org.At.tair.db','org.Dr.eg.db','org.Bt.eg.db','org.Ce.eg.db','org.Gg.eg.db','org.Cf.eg.db','org.Ss.eg.db','org.Mmu.eg.db','org.EcK12.eg.db','org.Xl.eg.db','org.Pt.eg.db','org.Ag.eg.db','org.Pf.plasmo.db','org.EcSakai.eg.db'))\""

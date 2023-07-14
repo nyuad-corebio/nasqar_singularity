@@ -8,28 +8,31 @@ cd nasqar_singularity
 sh download_data.sh
 ```
 
-- Here is the definition file -> 
+- Here is the definition file -> Nasqar.def 
 
-Build the singularity sandbox
+Build the singularity sandbox.
 ```
 sudo singularity build --sandbox nasqar_sandbox Nasqar.def
 ```
 
-Verify the sandbox running manually
+Verify the sandbox running manually.
 ```
 sudo singularity shell --writable nasqar_sandbox
 ```
 
-Inside the singularity shell, execute below 
+Inside the singularity shell, execute below.
 ```
 su - shiny -s /bin/bash
 exec shiny-server
 ```
 
-That's it, now you can access the service via http://<IP-address/Hostname>:3232
+That's it, now you can access the service via http://<IP-address/Hostname>:3232 .
 
-To convert this sandbox as a sif file 
+Note:- You can change the port number by modifying /etc/shiny-server/shiny-server.conf
+
+To convert this sandbox as a sif file.
 ```
-sudo singularity build nasqar_prod.sif nasqar_sandbox
+sudo singularity build nasqar.sif nasqar_sandbox
 ```
 
+To run from the nasqar.sif.
