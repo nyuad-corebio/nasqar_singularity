@@ -35,4 +35,13 @@ To convert this sandbox as a sif file.
 sudo singularity build nasqar.sif nasqar_sandbox
 ```
 
-To run from the nasqar.sif.
+To run, you need to create two directories named logs and lib in the current working directory. 
+```
+mkdir logs lib
+```
+
+To initiate the Nasqar singularity image.
+```
+sudo singularity run --bind ./logs:/var/log/shiny-server/  --bind ./lib:/var/lib/shiny-server/ nasqar.sif
+```
+

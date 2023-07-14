@@ -74,5 +74,4 @@ From: rocker/shiny:4.2.3
 
 
 %runscript
-    exec /bin/bash --rcfile /home/shiny/.bashrc -c "/bin/bash /opt/nasqar_build/shiny-server.sh"
-
+    exec su - shiny -s /bin/bash -c "source /home/shiny/miniconda3/etc/profile.d/conda.sh && conda activate nasqar_env && exec shiny-server"
