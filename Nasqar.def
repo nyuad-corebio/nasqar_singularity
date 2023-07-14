@@ -1,0 +1,67 @@
+Bootstrap: docker
+From: rocker/shiny:4.2.3
+
+%files
+    /home/jr5241/singularity/environment.yaml /home/shiny/environment.yaml
+    /home/jr5241/singularity/NASQAR /opt/nasqar_build/NASQAR
+    /home/jr5241/singularity/ClusterProfShinyGSEA /opt/nasqar_build/ClusterProfShinyGSEA
+    /home/jr5241/singularity/ClusterProfShinyORA /opt/nasqar_build/ClusterProfShinyORA
+    /home/jr5241/singularity/shiny-server.conf /etc/shiny-server/shiny-server.conf
+    /home/jr5241/singularity/shiny-server.sh /opt/nasqar_build/shiny-server.sh
+    /home/jr5241/singularity/DEApp /opt/nasqar_build/DEApp
+    /home/jr5241/singularity/deseq2shiny /opt/nasqar_build/deseq2shiny
+    /home/jr5241/singularity/GeneCountMerger /opt/nasqar_build/GeneCountMerger
+    /home/jr5241/singularity/ATACseqQCShniy /opt/nasqar_build/ATACseqQCShniy
+    
+%post
+    apt-get update \
+    && apt-get install -y vim libjpeg9 libtiff5-dev cmake libmagick++-dev libarchive-dev \
+    && apt-get autoremove -yqq --purge \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+    
+    cd /opt/nasqar_build && wget https://github.com/UMMS-Biocore/debrowser/archive/refs/heads/master.zip && unzip master.zip
+    
+    export TZ=Asia/Dubai
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+    mkdir /var/log/nasqar
+    chmod 777 /var/log/nasqar
+
+    chown -R shiny:shiny /home/shiny
+    cd /home/shiny
+
+    su shiny -c "wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    mkdir /home/shiny/.conda
+    su shiny -c "bash Miniconda3-latest-Linux-x86_64.sh -b -p /home/shiny/miniconda3"
+    rm -f Miniconda3-latest-Linux-x86_64.sh
+
+    echo 'PATH="/home/shiny/miniconda3/bin:$PATH"' >> /home/shiny/.bashrc
+    su shiny -c "/home/shiny/miniconda3/bin/conda install -c conda-forge mamba -y"
+    su shiny -c "cd /home/shiny && /home/shiny/miniconda3/bin/mamba env create -f environment.yaml"
+
+    su shiny -c "/home/shiny/miniconda3/bin/conda init bash"
+    echo 'conda activate nasqar_env' >> /home/shiny/.bashrc
+    echo 'alias l="ls -lah"' >> /home/shiny/.bashrc
+    su shiny -c "cd /home/shiny && /home/shiny/miniconda3/bin/conda clean --all -y"
+
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"install.packages(c('stringi', 'GOplot', 'wordcloud2'), repos='http://cran.rstudio.com/')\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"devtools::install_github('YuLab-SMU/clusterProfiler')\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install(c('org.Hs.eg.db','org.Mm.eg.db','org.Rn.eg.db','org.Sc.sgd.db','org.Dm.eg.db','org.At.tair.db','org.Dr.eg.db','org.Bt.eg.db','org.Ce.eg.db','org.Gg.eg.db','org.Cf.eg.db','org.Ss.eg.db','org.Mmu.eg.db','org.EcK12.eg.db','org.Xl.eg.db','org.Pt.eg.db','org.Ag.eg.db','org.Pf.plasmo.db','org.EcSakai.eg.db'))\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"devtools::install_github('smin95/smplot2')\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"devtools::install_github('nyuad-corebio/seuratv3wizard')\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install(c('ATACseqQC'))\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install(c('ChIPpeakAnno', 'MotifDb', 'GenomicAlignments'))\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('BSgenome.Hsapiens.UCSC.hg19'), ask = FALSE, update = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('TxDb.Hsapiens.UCSC.hg19.knownGene'), ask = FALSE, update = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('BSgenome.Celegans.UCSC.ce11'), ask = FALSE, update = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('TxDb.Celegans.UCSC.ce11.refGene'), ask = FALSE, update = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('BSgenome.Drerio.UCSC.danRer11'), ask = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('TxDb.Drerio.UCSC.danRer11.refGene'), ask = FALSE, update = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('BSgenome.Mmusculus.UCSC.mm10'), ask = FALSE, update = FALSE)\""
+    su shiny -c "/home/shiny/miniconda3/bin/conda run -n nasqar_env R -e \"BiocManager::install( c('TxDb.Mmusculus.UCSC.mm10.knownGene'), ask = FALSE, update = FALSE)\""
+
+
+%runscript
+    exec /bin/bash --rcfile /home/shiny/.bashrc -c "/bin/bash /opt/nasqar_build/shiny-server.sh"
+
