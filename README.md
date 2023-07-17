@@ -22,7 +22,6 @@ sudo singularity shell --writable nasqar_sandbox
 
 Inside the singularity shell, execute below.
 ```
-su - shiny -s /bin/bash
 exec shiny-server
 ```
 
@@ -40,8 +39,16 @@ To run, you need to create two directories.
 mkdir logs lib
 ```
 
-To initiate the Nasqar singularity image.
+Modify the username in the shiny-server.conf file located in your current working directory. 
+Important Note:- This way you can map the singularity instance running with your user profile.  
 ```
-sudo singularity run --bind ./logs:/var/log/shiny-server/  --bind ./lib:/var/lib/shiny-server/ nasqar.sif
+vim shiny-server.conf
+run_as <specify-your-username>;
+```
+
+
+To initiate the Nasqar, excecute below.
+```
+singularity run --bind ./shiny-server.conf:/etc/shiny-server/shiny-server.conf  --bind ./logs:/var/log/shiny-server/  --bind ./lib:/var/lib/shiny-server/ nasqar.sif
 ```
 
