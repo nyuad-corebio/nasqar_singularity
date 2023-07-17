@@ -15,17 +15,11 @@ Build the singularity sandbox.
 sudo singularity build --sandbox nasqar_sandbox Nasqar.def
 ```
 
-Verify the sandbox running manually.
+If you need to inspect the sandbox, excecute below. 
 ```
 sudo singularity shell --writable nasqar_sandbox
 ```
 
-Inside the singularity shell, execute below.
-```
-exec shiny-server
-```
-
-That's it, now you can access the service via http://<IP-address/Hostname>:3232 .
 
 Note:- You can change the port number by modifying /etc/shiny-server/shiny-server.conf
 
@@ -46,9 +40,11 @@ vim shiny-server.conf
 run_as <specify-your-username>;
 ```
 
+Note:- You can change the port number by modifying /etc/shiny-server/shiny-server.conf
 
 To initiate the Nasqar, excecute below.
 ```
 singularity run --bind ./shiny-server.conf:/etc/shiny-server/shiny-server.conf  --bind ./logs:/var/log/shiny-server/  --bind ./lib:/var/lib/shiny-server/ nasqar.sif
 ```
 
+That's it, now you can access the service via http://<IP-address/Hostname>:3232 .
