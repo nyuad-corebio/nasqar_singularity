@@ -21,8 +21,6 @@ sudo singularity shell --writable nasqar_sandbox
 ```
 
 
-Note:- You can change the port number by modifying /etc/shiny-server/shiny-server.conf
-
 To convert this sandbox as a sif file.
 ```
 sudo singularity build nasqar.sif nasqar_sandbox
