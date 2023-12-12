@@ -21,7 +21,7 @@ sudo singularity shell --writable nasqar_sandbox
 ```
 
 
-
+- 
 
 To convert this sandbox as a sif file.
 ```
